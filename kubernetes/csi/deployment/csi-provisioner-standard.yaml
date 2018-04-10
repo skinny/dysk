@@ -33,7 +33,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-provisioner
-    namespace: default
+    namespace: flex
 roleRef:
   kind: ClusterRole
   name: external-provisioner-runner
@@ -44,6 +44,7 @@ kind: Service
 apiVersion: v1
 metadata:
   name: csi-provisioner
+  namespace: flex
   labels:
     app: csi-provisioner
 spec:
@@ -58,6 +59,7 @@ kind: StatefulSet
 apiVersion: apps/v1beta1
 metadata:
   name: csi-provisioner
+  namespace: flex
 spec:
   serviceName: "csi-provisioner"
   replicas: 1
@@ -67,6 +69,13 @@ spec:
         app: csi-provisioner
     spec:
       serviceAccount: csi-provisioner
+      initContainers:
+        - name: init-paths
+          image: busybox
+          command: ['sh', '-c', 'mkdir -p /plugins/csi-dysk']
+          volumeMounts:
+            - name: plugins-dir
+              mountPath: /plugins
       containers:
         - name: csi-provisioner
           image: andyzhangx/csi-provisioner:1.0.0
@@ -85,4 +94,7 @@ spec:
         - name: socket-dir
           hostPath:
             path: /var/lib/kubelet/plugins/csi-dysk
-            type: DirectoryOrCreate
+            #type: DirectoryOrCreate
+        - name: plugins-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins

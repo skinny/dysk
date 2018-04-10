@@ -80,7 +80,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           volumeMounts:
             - name: socket-dir
-              mountPath: /var/lib/kubelet/plugins/csi-dysk
+              mountPath: /var/lib/kubelet/plugins
       volumes:
         - name: socket-dir
           hostPath:

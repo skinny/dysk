@@ -30,7 +30,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-attacher
-    namespace: default
+    namespace: flex
 roleRef:
   kind: ClusterRole
   name: external-attacher-runner
@@ -64,11 +64,18 @@ spec:
         app: csi-attacher
     spec:
       serviceAccount: csi-attacher
+      initContainers:
+        - name: init-paths
+          image: busybox
+          command: ['sh', '-c', 'mkdir -p /plugins/csi-dysk']
+          volumeMounts:
+            - name: plugins-dir
+              mountPath: /plugins
       containers:
         - name: csi-attacher
           image: quay.io/k8scsi/csi-attacher:v0.2.0
           args:
-            - "--v=5"
+            - "--v=9"
             - "--csi-address=$(ADDRESS)"
           env:
             - name: ADDRESS
@@ -81,4 +88,7 @@ spec:
         - name: socket-dir
           hostPath:
             path: /var/lib/kubelet/plugins/csi-dysk
-            type: DirectoryOrCreate
+            #type: DirectoryOrCreate
+        - name: plugins-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins
